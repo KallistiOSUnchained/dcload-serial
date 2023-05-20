@@ -46,4 +46,8 @@ void dc_cdfs_redir_read_sectors(int isofd);
 
 void dc_gdbpacket(void);
 
+void finish_serial(void);
+
+_Noreturn void dc_exit(void);
+
 #endif

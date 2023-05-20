@@ -371,7 +371,7 @@ void dc_opendir(void) {
 
     somedir = opendir((const char *)dirname);
 
-    send_uint((unsigned int)somedir);
+    send_uint((uintptr_t)somedir);
 
     free(dirname);
 }
@@ -380,7 +380,7 @@ void dc_closedir(void) {
     DIR *somedir;
     int retval;
 
-    somedir = (DIR *) recv_uint();
+    somedir = (DIR *)(uintptr_t)recv_uint();
 
     retval = closedir(somedir);
 
@@ -391,7 +391,7 @@ void dc_readdir(void) {
     DIR *somedir;
     struct dirent *somedirent;
 
-    somedir = (DIR *) recv_uint();
+    somedir = (DIR *)(uintptr_t)recv_uint();
 
     somedirent = readdir(somedir);
 
@@ -427,7 +427,7 @@ void dc_rewinddir(void) {
     DIR *somedir;
     int retval;
 
-    somedir = (DIR *) recv_uint();
+    somedir = (DIR *)(uintptr_t)recv_uint();
 
     rewinddir(somedir);
 
@@ -519,3 +519,11 @@ void dc_gdbpacket(void) {
     if(retval > 0)
         send_data((unsigned char *)gdb_buf, retval, 0);
 }
+
+void dc_exit(void) {
+    int exit_code = (int32_t) recv_uint();
+    printf("Program returned %d\n", exit_code);
+    finish_serial();
+    exit(exit_code);
+}
+

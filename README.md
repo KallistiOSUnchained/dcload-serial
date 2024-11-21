@@ -3,7 +3,7 @@
 **dcload** is a **Sega Dreamcast** (DC) serial loader written originally by 
 [Andrew Kieschnick](http://napalm-x.thegypsy.com/andrewk/dc/), a.k.a.
 **ADK/Napalm**. It is currently maintained as a part of 
-[KallistiOS](http://gamedev.allusion.net/softprj/kos/) (KOS).
+[KallistiOS (Unchained)](https://github.com/KallistiOSUnchained) (KOSU).
 
 **dcload** is a set of programs made to send and receive data from your Sega
 Dreamcast system. The classic use of this tool is to send programs to the
@@ -35,7 +35,7 @@ Adapter or LAN Adapter, you have to use `dcload-ip`.
 ## Building
 
 1. You should have a working 
-   [KallistiOS](http://gamedev.allusion.net/softprj/kos/) (KOS) environment and
+   [KallistiOS (Unchained)](https://github.com/KallistiOSUnchained/KallistiOS) (KOSU) environment and
    of course the `sh-elf` toolchain installed (if you have installed KOS, you 
    already have everything ready).
 2. Edit the `Makefile.cfg` file for your system and then run `make`.
@@ -78,7 +78,7 @@ You have the possibility to use **dcload** to debug remotely Dreamcast binaries.
 To run a GNU debugger session over the **dcload** connection:
 
 1. Build/obtain an `sh-elf` targetted GNU debugger (can be made with `dc-chain`
-   utility from [KallistiOS](http://gamedev.allusion.net/softprj/kos/)).
+   utility from [KallistiOS (Unchained)](https://github.com/KallistiOSUnchained/KallistiOS)).
 2. Put a `gdb_init()` call somewhere in the startup area of your
    KOS-based program (e.g. it's a good idea to put this call in your `main()`),
    then add the `#include <arch/gdb.h>` statement in that file.
@@ -89,9 +89,8 @@ To run a GNU debugger session over the **dcload** connection:
 
 ## Notes
 
-* **dcload**, both IP and Serial, are maintained by the KOS
-  team. Please join the [KallistiOS list](http://sf.net/projects/cadcdev/) 
-  for help with these tools.
+* **dcload**, both IP and Serial, are maintained by the KOSU
+  team.
 * Tested systems: Debian GNU/Linux 2.2; Gentoo/Linux 2.6.7; Cygwin;
   Mac OSX 10.3.5 (Panther); macOS 10.15.2 (Catalina), MinGW/MSYS, 
   [DreamSDK](https://www.dreamsdk.org), MinGW-w64/MSYS2.

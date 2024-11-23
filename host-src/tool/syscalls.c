@@ -19,25 +19,25 @@
  *
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <dirent.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
+#include <sys/stat.h>
 #include <sys/time.h>
+#include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
 #include <utime.h>
-#include <dirent.h>
 #ifdef __MINGW32__
 #include <winsock2.h>
 #else
 #include <arpa/inet.h>
 #endif
-#include "syscalls.h"
 #include "dc-io.h"
+#include "syscalls.h"
 
 #ifndef O_BINARY
 #define O_BINARY 0
@@ -251,7 +251,7 @@ void dc_chmod(void) {
     int mode;
     unsigned char *pathname;
     int retval;
-    
+
     namelen = recv_uint();
 
     pathname = malloc(namelen);
@@ -348,8 +348,7 @@ void dc_utime(void) {
         tbuf.modtime = recv_uint();
 
         retval = utime((const char *)pathname, &tbuf);
-    } 
-    else {
+    } else {
         retval = utime((const char *)pathname, 0);
     }
 
@@ -399,7 +398,7 @@ void dc_readdir(void) {
         send_uint(0);
         return;
     }
-        
+
     send_uint(1);
     send_uint(somedirent->d_ino);
 #ifdef _WIN32
@@ -419,8 +418,8 @@ void dc_readdir(void) {
 #endif
     send_uint(somedirent->d_type);
 #endif
-    send_uint(strlen(somedirent->d_name)+1);
-    send_data((unsigned char *)somedirent->d_name, strlen(somedirent->d_name)+1, 0);
+    send_uint(strlen(somedirent->d_name) + 1);
+    send_data((unsigned char *)somedirent->d_name, strlen(somedirent->d_name) + 1, 0);
 }
 
 void dc_rewinddir(void) {
@@ -437,7 +436,7 @@ void dc_rewinddir(void) {
 void dc_cdfs_redir_read_sectors(int isofd) {
     int start;
     int num;
-    unsigned char * buf;
+    unsigned char *buf;
 
     start = recv_uint();
     num = recv_uint();
@@ -488,7 +487,7 @@ void dc_gdbpacket(void) {
     if(socket_fd == 0) {
         printf("waiting for gdb client connection...\n");
         socket_fd = accept(gdb_server_socket, NULL, NULL);
-        
+
         if(socket_fd == 0) {
             perror("error accepting gdb server connection");
             send_uint(-1);

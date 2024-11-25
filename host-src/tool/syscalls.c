@@ -43,6 +43,16 @@
 #define O_BINARY 0
 #endif
 
+#ifndef MAX_OPEN_DIRS
+#define MAX_OPEN_DIRS 16
+#endif
+
+/* Sigh... KOS treats anything under 100 as invalid for a dirent from dcload, so
+   we need to offset by a bit. This aught to do. */
+#define DIRENT_OFFSET 1337
+
+static DIR *opendirs[MAX_OPEN_DIRS];
+
 void dc_fstat(void) {
     int filedes;
     struct stat filestat;
@@ -348,7 +358,8 @@ void dc_utime(void) {
         tbuf.modtime = recv_uint();
 
         retval = utime((const char *)pathname, &tbuf);
-    } else {
+    }
+    else {
         retval = utime((const char *)pathname, 0);
     }
 
@@ -358,9 +369,8 @@ void dc_utime(void) {
 }
 
 void dc_opendir(void) {
-    DIR *somedir;
     unsigned char *dirname;
-    int namelen;
+    int hnd, namelen;
 
     namelen = recv_uint();
 
@@ -368,69 +378,96 @@ void dc_opendir(void) {
 
     recv_data(dirname, namelen, 0);
 
-    somedir = opendir((const char *)dirname);
+    /* Find an open entry */
+    for(hnd = 0; hnd < MAX_OPEN_DIRS; ++hnd) {
+        if(!opendirs[hnd])
+            break;
+    }
 
-    send_uint((uintptr_t)somedir);
+    if(hnd < MAX_OPEN_DIRS) {
+        if(!(opendirs[hnd] = opendir((const char *)dirname)))
+            hnd = 0;
+        else
+            hnd += DIRENT_OFFSET;
+    }
+    else {
+        hnd = 0;
+    }
+
+    send_uint((unsigned int)hnd);
 
     free(dirname);
 }
 
 void dc_closedir(void) {
-    DIR *somedir;
-    int retval;
+    int hnd, retval;
 
-    somedir = (DIR *)(uintptr_t)recv_uint();
+    hnd = recv_uint();
 
-    retval = closedir(somedir);
+    if(hnd >= DIRENT_OFFSET && hnd < MAX_OPEN_DIRS + DIRENT_OFFSET) {
+        retval = closedir(opendirs[hnd - DIRENT_OFFSET]);
+        opendirs[hnd - DIRENT_OFFSET] = NULL;
+    }
+    else
+        retval = -1;
 
     send_uint(retval);
 }
 
 void dc_readdir(void) {
-    DIR *somedir;
+    int hnd;
     struct dirent *somedirent;
 
-    somedir = (DIR *)(uintptr_t)recv_uint();
+    hnd = recv_uint();
 
-    somedirent = readdir(somedir);
+    if(hnd >= DIRENT_OFFSET && hnd < MAX_OPEN_DIRS + DIRENT_OFFSET)
+        somedirent = readdir(opendirs[hnd - DIRENT_OFFSET]);
+    else
+        somedirent = NULL;
 
-    if(!somedirent) {
-        send_uint(0);
-        return;
-    }
-
-    send_uint(1);
-    send_uint(somedirent->d_ino);
+    if(somedirent) {
+        send_uint(1);
+        send_uint(somedirent->d_ino);
 #ifdef _WIN32
-    send_uint(0);
-    send_uint(0);
-    send_uint(0);
+        send_uint(0);
+        send_uint(0);
+        send_uint(0);
 #else
 #ifdef __APPLE_CC__
-    send_uint(0);
+        send_uint(0);
 #else
 #if !defined(__FreeBSD__) && !defined(__CYGWIN__)
-    send_uint(somedirent->d_off);
+        send_uint(somedirent->d_off);
 #endif
 #endif
 #ifndef __CYGWIN__
-    send_uint(somedirent->d_reclen);
+        send_uint(somedirent->d_reclen);
 #endif
-    send_uint(somedirent->d_type);
+        send_uint(somedirent->d_type);
 #endif
-    send_uint(strlen(somedirent->d_name) + 1);
-    send_data((unsigned char *)somedirent->d_name, strlen(somedirent->d_name) + 1, 0);
+        send_uint(strlen(somedirent->d_name) + 1);
+        send_data((unsigned char *)somedirent->d_name, strlen(somedirent->d_name) + 1, 0);
+        return;
+    }
+
+    send_uint(0);
 }
 
 void dc_rewinddir(void) {
-    DIR *somedir;
+    uint32_t hnd;
     int retval;
 
-    somedir = (DIR *)(uintptr_t)recv_uint();
+    hnd = recv_uint();
 
-    rewinddir(somedir);
+    if(hnd >= DIRENT_OFFSET && hnd < MAX_OPEN_DIRS + DIRENT_OFFSET) {
+        rewinddir(opendirs[hnd - DIRENT_OFFSET]);
+        retval = 0;
+    }
+    else {
+        retval = -1;
+    }
 
-    send_uint(0);
+    send_uint(retval);
 }
 
 void dc_cdfs_redir_read_sectors(int isofd) {

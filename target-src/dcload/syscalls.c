@@ -259,8 +259,8 @@ struct dirent *readdir(DIR *dir) {
         load_data_block_general(ourdirent.d_name, namelen, 0);
 
         return &ourdirent;
-    } else
-
+    }
+    else
         return 0;
 }
 

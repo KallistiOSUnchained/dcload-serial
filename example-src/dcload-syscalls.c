@@ -1,6 +1,7 @@
 #include "dcload-syscall.h"
 
 #include <sys/stat.h>
+#include <stdnoreturn.h>
 
 extern void __exit(int status);
 
@@ -67,13 +68,18 @@ int unlink(const char *path) {
         return -1;
 }
 
-void __attribute__((noreturn)) exit(int status) {
+noreturn void exit(int status) {
     if(*DCLOADMAGICADDR == DCLOADMAGICVALUE)
         dcloadsyscall(pcexitnr);
 
     __exit(status);
-    /* Ensure function never returns */
-    for(;;) {}
+
+    /* Fallback safeguard */
+    for (;;) {
+        __asm__ volatile ("nop");
+    }
+
+    __builtin_unreachable();
 }
 
 int stat(const char *path, struct stat *st) {

@@ -5,6 +5,7 @@
 *.exe
 *.elf
 .DS_Store
+.vscode/
 example-src/console-test
 example-src/exception-test
 target-src/dcload/dcload

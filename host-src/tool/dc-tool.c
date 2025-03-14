@@ -38,8 +38,9 @@
 #include <windows.h>
 #else
 #ifdef __linux__
-#include <asm/termbits.h>
-#include <sys/ioctl.h>
+// #include <asm/termbits.h>
+// #include <sys/ioctl.h>
+#include <termios.h>
 #else
 #include <termios.h>
 #endif

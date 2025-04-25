@@ -33,6 +33,7 @@
 #include <utime.h>
 #ifdef __MINGW32__
 #include <winsock2.h>
+#include <stdint.h>
 #else
 #include <arpa/inet.h>
 #endif
@@ -43,13 +44,11 @@
 #define O_BINARY 0
 #endif
 
-#ifndef MAX_OPEN_DIRS
-#define MAX_OPEN_DIRS 16
-#endif
-
 /* Sigh... KOS treats anything under 100 as invalid for a dirent from dcload, so
    we need to offset by a bit. This aught to do. */
-#define DIRENT_OFFSET 1337
+#define DIRENT_OFFSET   1337
+
+#define MAX_OPEN_DIRS 512
 
 static DIR *opendirs[MAX_OPEN_DIRS];
 

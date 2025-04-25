@@ -1,8 +1,7 @@
 #ifndef __DCLOAD_SYSCALLS_H__
 #define __DCLOAD_SYSCALLS_H__
 
-/* Forward declaration of struct stat */
-struct stat;
+#include <sys/stat.h>
 
 #define O_RDONLY        0
 #define O_WRONLY        1
@@ -19,7 +18,7 @@ int creat(const char *path, int mode);
 int unlink(const char *path);
 void __attribute__((noreturn)) exit(int status);
 int stat(const char *path, struct stat *st);
-int chmod(const char *path, unsigned int mode);
+int chmod(const char *path, mode_t mode);
 int utime(const char *path, char *times);
 int chdir(const char *path);
 long time(long *t);

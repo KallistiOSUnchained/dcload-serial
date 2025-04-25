@@ -89,7 +89,7 @@ int stat(const char *path, struct stat *st) {
         return -1;
 }
 
-int chmod(const char *path, unsigned int mode) {
+int chmod(const char *path, mode_t mode) {
     if(*DCLOADMAGICADDR == DCLOADMAGICVALUE)
         return dcloadsyscall(pcchmodnr, path, mode);
     else
